@@ -29,43 +29,47 @@ func (e *Battery) Init(_id int, _amountOfColumns int, _amountOfFloors int, _amou
 	e.amountOfFloors = _amountOfFloors
 	e.amountOfBasements = _amountOfBasements
 	e.amountOfElevatorPerColumn = _amountOfElevatorPerColumn
-
+	//Column creator
 	for i := 0; i < _amountOfColumns; i++ {
 		column := new(Column)
-		column.Init(i, _amountOfElevatorPerColumn, i, trueFalseinator(i))
+		column.Init(i, _amountOfElevatorPerColumn, trueFalseinator(i))
 		e.columnList = append(e.columnList, *column)
+		//Assigning floors to each elevator column
 		if i == 0 {
 			for x := 0; x < 6; x++ {
-				//columnList[0].servedFloors.Add(x - 6) adds basements
+				e.columnList[0].servedFloors = append(e.columnList[0].servedFloors, x-6)
 			}
-			//columnList[0].servedFloors.Add(1) adding lobby
-		}
+			e.columnList[0].servedFloors = append(e.columnList[0].servedFloors, 1)
+		} //Sorry, I
 		if i == 1 {
 			for x := 0; x < 20; x++ {
-				//columnList[1].servedFloors.Add(x + 1)
+				e.columnList[1].servedFloors = append(e.columnList[1].servedFloors, x+1)
 			}
-		}
+		} //Didn't make
 		if i == 2 {
 			for x := 20; x < 40; x++ {
-				//columnList[2].servedFloors.Add(x + 1)
+				e.columnList[2].servedFloors = append(e.columnList[2].servedFloors, x+1)
 			}
-			//columnList[2].servedFloors.Add(1) adding lobby
-		}
+			e.columnList[2].servedFloors = append(e.columnList[2].servedFloors, 1)
+		} //This simpler
 		if i == 3 {
 			for x := 40; x < 60; x++ {
-				//columnList[3].servedFloors.Add(x + 1)
+				e.columnList[3].servedFloors = append(e.columnList[3].servedFloors, x+1)
 			}
-			//columnList[3].servedFloors.Add(1) adding lobby
+			e.columnList[3].servedFloors = append(e.columnList[3].servedFloors, 1)
 		}
 	}
 	//Lobby only up and down buttons
 	for i := 0; i < 1; i++ {
-		//upFloorRequestButtonCreator = new FloorRequestButton(i, i + 1, "up");
-		//floorRequestButtonsList.Add(upFloorRequestButtonCreator);
+		upFloorRequestButtonCreator := new(FloorRequestButton)
+		upFloorRequestButtonCreator.Init(i, i+1, "up")
+		e.floorRequestButtonList = append(e.floorRequestButtonList, *upFloorRequestButtonCreator)
+
 	}
 	for i := 0; i < 1; i++ {
-		//downFloorRequestButtonCreator = new FloorRequestButton(i, i + 1, "down");
-		//floorRequestButtonsList.Add(downFloorRequestButtonCreator);
+		downFloorRequestButtonCreator := new(FloorRequestButton)
+		downFloorRequestButtonCreator.Init(i, i+1, "down")
+		e.floorRequestButtonList = append(e.floorRequestButtonList, *downFloorRequestButtonCreator)
 	}
 
 }
@@ -74,20 +78,37 @@ type Column struct {
 	ID                int
 	status            string
 	amountOfElevators int
-	servedFloors      int
+	servedFloors      []int
 	isBasement        bool
 	elevatorList      []Elevator
 	callButtonList    []CallButton
 }
 
-func (e *Column) Init(_id int, _amountOfElevators int, _servedFloors int, _isBasement bool) {
+func (e *Column) Init(_id int, _amountOfElevators int, _isBasement bool) {
 	e.ID = _id
 	e.status = "built"
-	e.servedFloors = _servedFloors
 	e.isBasement = _isBasement
+	//Elevator creator
 	for i := 0; i < _amountOfElevators; i++ {
-		//elevator := new(Elevator)
-		//elevator.Init(i, "")
+		elevator := new(Elevator)
+		elevator.Init(i, "idle", 1)
+		e.elevatorList = append(e.elevatorList, *elevator)
+	}
+	//Creates the CallButton for the basement floors
+	if _isBasement == true {
+		for i := 0; i < 6; i++ {
+			upCallButtonCreator := new(CallButton)
+			upCallButtonCreator.Init(i, -6-i, "up")
+			e.callButtonList = append(e.callButtonList, *upCallButtonCreator)
+		}
+	}
+	//Creates the CallButton for everything else
+	if _isBasement == false {
+		for i := 2; i <= 60; i++ {
+			downCallButtonCreator := new(CallButton)
+			downCallButtonCreator.Init(i, i, "down")
+			e.callButtonList = append(e.callButtonList, *downCallButtonCreator)
+		}
 	}
 }
 
@@ -112,23 +133,39 @@ type CallButton struct {
 	floor     int
 	direction string
 }
+
+func (e *CallButton) Init(_id int, _floor int, _direction string) {
+	e.ID = _id
+	e.floor = _floor
+	e.direction = _direction
+}
+
 type FloorRequestButton struct {
 	ID        int
 	floor     int
 	direction string
 }
+
+func (e *FloorRequestButton) Init(_id int, _floor int, _direction string) {
+	e.ID = _id
+	e.floor = _floor
+	e.direction = _direction
+}
+
 type Door struct {
 	ID int
 }
 
+//Build Door func, add it into the elevator Init.
+//Then on to the fun methods and selectors tomorrow >:)
 func main() {
-	elevator1 := new(Elevator)
-	//elevator1.Init(1, "idle", 1, "")
-	column1 := new(Column)
-	column1.Init(1, 5, 0, false)
-	fmt.Print(column1.ID, column1.amountOfElevators)
-	fmt.Print(elevator1.ID, elevator1.currentFloor)
+	// elevator1 := new(Elevator)
+	// elevator1.Init(1, "idle", 1)
+	// column1 := new(Column)
+	// column1.Init(1, 5, false)
+	//fmt.Print(column1.ID, column1.amountOfElevators)
+	//fmt.Print(elevator1.ID, elevator1.currentFloor)
 	battery1 := new(Battery)
 	battery1.Init(1, 4, 60, 6, 5)
-	fmt.Print(battery1.columnList)
+	fmt.Print(battery1.columnList[1].callButtonList)
 }
