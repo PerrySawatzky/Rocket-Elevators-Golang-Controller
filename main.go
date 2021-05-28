@@ -163,6 +163,7 @@ func (this Battery) assignElevator(_requestedFloor float64, _direction string) E
 		fmt.Print(".\n")
 	}
 	for bestElevator.currentFloor == _requestedFloor {
+		bestElevator.completedRequestsList = append(bestElevator.completedRequestsList, _requestedFloor)
 		bestElevator.status = "idle"
 		fmt.Print("*DING* Elevator has arrived at floor ")
 		fmt.Print(_requestedFloor)
@@ -321,7 +322,7 @@ type Elevator struct {
 	direction             string
 	door                  []Door
 	floorRequestsList     []float64
-	completedRequestsList []int
+	completedRequestsList []float64
 }
 
 func (e *Elevator) Init(_id int, _status string, _currentFloor float64) {
