@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	//"container/list"
 )
 
@@ -11,7 +12,7 @@ type Battery struct {
 	bestColumn                Column
 	bestElevator              Elevator
 	bestScore                 int
-	referenceGap              int
+	referenceGap              float64
 	amountOfColumns           int
 	amountOfFloors            int
 	amountOfBasements         int
@@ -20,17 +21,6 @@ type Battery struct {
 	floorRequestButtonsList   []FloorRequestButton
 }
 
-func (e Battery) findBestColumn(_requestedFloor int) Column {
-	bestColumn := e.columnsList[0]
-	return bestColumn
-}
-
-func (e Battery) assignElevator(_requestedFloor int, _direction string) Elevator {
-	bestElevator := e.columnsList[0].elevatorsList[1]
-	fmt.Print(bestElevator)
-	return bestElevator
-
-}
 func trueFalseinator(i int) bool {
 	if i == 0 {
 		return true
@@ -90,6 +80,102 @@ func (e *Battery) Init(_id int, _amountOfColumns int, _amountOfFloors int, _amou
 	}
 
 }
+func (this Battery) findBestColumn(_requestedFloor float64) Column {
+	bestColumn := this.columnsList[0]
+	if _requestedFloor < 1 {
+		bestColumn = this.columnsList[0]
+	}
+	if _requestedFloor > 1 && _requestedFloor <= 20 {
+		bestColumn = this.columnsList[1]
+	}
+	if _requestedFloor >= 21 && _requestedFloor <= 40 {
+		bestColumn = this.columnsList[2]
+	}
+	if _requestedFloor >= 41 {
+		bestColumn = this.columnsList[3]
+	}
+
+	return bestColumn
+}
+
+func (this Battery) assignElevator(_requestedFloor float64, _direction string) Elevator {
+	bestColumn := this.columnsList[0]
+	bestElevator := this.columnsList[0].elevatorsList[1]
+	bestScore := 5
+	referenceGap := 10000
+	if _requestedFloor < 1 {
+		bestColumn = this.columnsList[0]
+	}
+	if _requestedFloor > 1 && _requestedFloor <= 20 {
+		bestColumn = this.columnsList[1]
+	}
+	if _requestedFloor >= 21 && _requestedFloor <= 40 {
+		bestColumn = this.columnsList[2]
+	}
+	if _requestedFloor >= 41 {
+		bestColumn = this.columnsList[3]
+	}
+	if _requestedFloor > 1 {
+		for i := 0; i < len(bestColumn.elevatorsList); i++ {
+			if bestColumn.elevatorsList[i].currentFloor == 1 && bestColumn.elevatorsList[i].status == "stopped" {
+				bestElevator = bestColumn.elevatorsList[i]
+				bestScore = 1
+				referenceGap = int(math.Abs(float64(bestColumn.elevatorsList[i].currentFloor - 1)))
+			}
+			if bestColumn.elevatorsList[i].currentFloor == 1 && bestColumn.elevatorsList[i].status == "idle" {
+				bestElevator = bestColumn.elevatorsList[i]
+				bestScore = 2
+				referenceGap = int(math.Abs(float64(bestColumn.elevatorsList[i].currentFloor - 1)))
+			}
+			if contains(bestColumn.elevatorsList[i].floorRequestsList, 1) == true && int(math.Abs(float64(bestColumn.elevatorsList[i].currentFloor-1))) < referenceGap && (bestColumn.elevatorsList[i].direction == "down") {
+				bestElevator = bestColumn.elevatorsList[i]
+				bestScore = 3
+				referenceGap = int(math.Abs(float64(bestColumn.elevatorsList[i].currentFloor - 1)))
+			}
+			if bestColumn.elevatorsList[i].status == "idle" {
+				bestElevator = bestColumn.elevatorsList[i]
+				bestScore = 4
+				referenceGap = int(math.Abs(float64(bestColumn.elevatorsList[i].currentFloor - 1)))
+			}
+		}
+	}
+	bestElevator.floorRequestsList = append(bestElevator.floorRequestsList, _requestedFloor)
+	for bestElevator.currentFloor > _requestedFloor {
+		bestElevator.currentFloor--
+		bestElevator.status = "moving"
+		fmt.Print("Elevator is on floor ")
+		fmt.Print(bestElevator.currentFloor)
+		fmt.Print(".\n")
+	}
+	for bestElevator.currentFloor < _requestedFloor {
+		bestElevator.currentFloor++
+		bestElevator.status = "moving"
+		fmt.Print("Elevator is on floor ")
+		fmt.Print(bestElevator.currentFloor)
+		fmt.Print(".\n")
+	}
+	for bestElevator.currentFloor == _requestedFloor {
+		bestElevator.status = "idle"
+		fmt.Print("*DING* Elevator has arrived at floor ")
+		fmt.Print(_requestedFloor)
+		fmt.Print(".\n")
+		break
+	}
+
+	fmt.Print(referenceGap)
+	fmt.Print(bestScore)
+	fmt.Print(bestElevator.ID)
+	return bestElevator
+
+}
+func contains(floorRequestsList []float64, e float64) bool {
+	for _, a := range floorRequestsList {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
 
 type Column struct {
 	ID                int
@@ -99,14 +185,80 @@ type Column struct {
 	isBasement        bool
 	bestElevator1     Elevator
 	bestScore1        int
-	referenceGap1     int
+	referenceGap1     float64
 	elevatorsList     []Elevator
 	callButtonsList   []CallButton
 }
 
-//func (e Battery) findBestColumn(_requestedFloor int) Column
-func (e Column) requestElevator(_requestedFloor int, _direction string) Elevator {
-	bestElevator1 := e.elevatorsList[0]
+func (this Column) requestElevator(_requestedFloor float64, _direction string) Elevator {
+	bestElevator1 := this.elevatorsList[0]
+	bestScore1 := 5
+	referenceGap1 := 1000000
+	for i := 0; i < len(this.elevatorsList); i++ {
+		if _requestedFloor > -7 && _requestedFloor < 1 {
+			if this.elevatorsList[i].currentFloor == _requestedFloor && this.elevatorsList[i].direction == "up" {
+				bestElevator1 = this.elevatorsList[i]
+				bestScore1 = 1
+				referenceGap1 = int(math.Abs(float64(this.elevatorsList[i].currentFloor - _requestedFloor)))
+			}
+			if contains(this.elevatorsList[i].floorRequestsList, 1) == true && this.elevatorsList[i].currentFloor < _requestedFloor && (this.elevatorsList[i].direction == "up") {
+				bestElevator1 = this.elevatorsList[i]
+				bestScore1 = 2
+				referenceGap1 = int(math.Abs(float64(this.elevatorsList[i].currentFloor - _requestedFloor)))
+			}
+			if this.elevatorsList[i].status == "idle" {
+				bestElevator1 = this.elevatorsList[i]
+				bestScore1 = 3
+				referenceGap1 = int(math.Abs(float64(this.elevatorsList[i].currentFloor - _requestedFloor)))
+			}
+		}
+		if _requestedFloor > 1 && _requestedFloor < 61 {
+			if this.elevatorsList[i].currentFloor == _requestedFloor && this.elevatorsList[i].direction == "down" {
+				bestElevator1 = this.elevatorsList[i]
+				bestScore1 = 1
+				referenceGap1 = int(math.Abs(float64(this.elevatorsList[i].currentFloor - _requestedFloor)))
+			}
+			if contains(this.elevatorsList[i].floorRequestsList, 1) == true && this.elevatorsList[i].currentFloor < _requestedFloor && int(math.Abs(float64(this.elevatorsList[i].currentFloor-_requestedFloor))) < referenceGap1 && (this.elevatorsList[i].direction == "down") {
+				bestElevator1 = this.elevatorsList[i]
+				bestScore1 = 2
+				referenceGap1 = int(math.Abs(float64(this.elevatorsList[i].currentFloor - _requestedFloor)))
+			}
+			if this.elevatorsList[i].status == "idle" {
+				bestElevator1 = this.elevatorsList[i]
+				bestScore1 = 3
+				referenceGap1 = int(math.Abs(float64(this.elevatorsList[i].currentFloor - _requestedFloor)))
+			}
+		}
+	}
+	for bestElevator1.currentFloor > 1 {
+		for bestElevator1.currentFloor == _requestedFloor {
+			fmt.Print("*DING* Elevator doors are open, please enter.\n")
+			break
+		}
+		bestElevator1.currentFloor--
+		bestElevator1.status = "moving"
+		fmt.Print("Elevator is on floor ")
+		fmt.Print(bestElevator1.currentFloor)
+		fmt.Print(".\n")
+	}
+	for bestElevator1.currentFloor < -1 {
+		bestElevator1.currentFloor++
+		bestElevator1.status = "moving"
+		fmt.Print("Elevator is on floor ")
+		fmt.Print(bestElevator1.currentFloor)
+		fmt.Print(".\n")
+	}
+	for bestElevator1.currentFloor == -1 {
+		bestElevator1.currentFloor++
+	}
+	for bestElevator1.currentFloor == 1 {
+		bestElevator1.status = "idle"
+		fmt.Print("*DING* Elevator has arrived at Lobby.")
+		break
+	}
+	fmt.Print(bestScore1)
+	fmt.Print(referenceGap1)
+
 	return bestElevator1
 }
 func (e *Column) Init(_id int, _amountOfElevators int, _isBasement bool) {
@@ -140,14 +292,14 @@ func (e *Column) Init(_id int, _amountOfElevators int, _isBasement bool) {
 type Elevator struct {
 	ID                    int
 	status                string
-	currentFloor          int
+	currentFloor          float64
 	direction             string
 	door                  []Door
-	floorRequestsList     []int
+	floorRequestsList     []float64
 	completedRequestsList []int
 }
 
-func (e *Elevator) Init(_id int, _status string, _currentFloor int) {
+func (e *Elevator) Init(_id int, _status string, _currentFloor float64) {
 	e.ID = _id
 	e.status = _status
 	e.currentFloor = _currentFloor
@@ -204,22 +356,85 @@ func main() {
 	// column1.Init(1, 5, false)
 	//fmt.Print(column1.ID, column1.amountOfElevators)
 	//fmt.Print(elevator1.ID, elevator1.currentFloor)
-	battery1 := new(Battery)
-	battery1.Init(1, 4, 60, 6, 5)
-	fmt.Print(len(battery1.columnsList))
-	fmt.Print("\ncolumnList ^")
-	fmt.Print(len(battery1.floorRequestButtonsList))
-	fmt.Print("\nfloorRequestButtonsList ^")
-	fmt.Print(len(battery1.columnsList[0].elevatorsList))
-	fmt.Print("\nelevatorsList ^")
-	fmt.Print(len(battery1.columnsList[0].callButtonsList))
-	fmt.Print("\ncallButtonsList ^")
-	fmt.Print(len(battery1.columnsList[1].servedFloors))
-	fmt.Print("\nservedFloors ^")
-	fmt.Print((battery1.columnsList[1].elevatorsList[0].door))
-	fmt.Print("\nelevatorsList[0].door ^")
-	fmt.Print((battery1.columnsList[1].isBasement))
-	fmt.Print("\nisBasement ^")
+	//Test Scenario 1
+	// battery1 := new(Battery)
+	// battery1.Init(1, 4, 60, 6, 5)
+	// battery1.columnsList[1].elevatorsList[0].currentFloor = 20
+	// battery1.columnsList[1].elevatorsList[1].currentFloor = 3
+	// battery1.columnsList[1].elevatorsList[2].currentFloor = 13
+	// battery1.columnsList[1].elevatorsList[3].currentFloor = 15
+	// battery1.columnsList[1].elevatorsList[4].currentFloor = 6
+	// battery1.columnsList[1].elevatorsList[0].floorRequestsList = append(battery1.columnsList[1].elevatorsList[0].floorRequestsList, 5)
+	// battery1.columnsList[1].elevatorsList[1].floorRequestsList = append(battery1.columnsList[1].elevatorsList[1].floorRequestsList, 15)
+	// battery1.columnsList[1].elevatorsList[2].floorRequestsList = append(battery1.columnsList[1].elevatorsList[2].floorRequestsList, 1)
+	// battery1.columnsList[1].elevatorsList[3].floorRequestsList = append(battery1.columnsList[1].elevatorsList[3].floorRequestsList, 2)
+	// battery1.columnsList[1].elevatorsList[4].floorRequestsList = append(battery1.columnsList[1].elevatorsList[4].floorRequestsList, 1)
+	// battery1.columnsList[1].elevatorsList[0].status = "moving"
+	// battery1.columnsList[1].elevatorsList[1].status = "moving"
+	// battery1.columnsList[1].elevatorsList[2].status = "moving"
+	// battery1.columnsList[1].elevatorsList[3].status = "moving"
+	// battery1.columnsList[1].elevatorsList[4].status = "moving"
+	// battery1.columnsList[1].elevatorsList[0].direction = "down"
+	// battery1.columnsList[1].elevatorsList[1].direction = "up"
+	// battery1.columnsList[1].elevatorsList[2].direction = "down"
+	// battery1.columnsList[1].elevatorsList[3].direction = "down"
+	// battery1.columnsList[1].elevatorsList[4].direction = "down"
+	// battery1.assignElevator(20, "up")
+
+	//Test Scenario 2
+	// battery2 := new(Battery)
+	// battery2.Init(1, 4, 60, 6, 5)
+	// battery2.columnsList[2].elevatorsList[0].currentFloor = 1
+	// battery2.columnsList[2].elevatorsList[1].currentFloor = 23
+	// battery2.columnsList[2].elevatorsList[2].currentFloor = 33
+	// battery2.columnsList[2].elevatorsList[3].currentFloor = 40
+	// battery2.columnsList[2].elevatorsList[4].currentFloor = 39
+	// battery2.columnsList[2].elevatorsList[0].floorRequestsList = append(battery2.columnsList[2].elevatorsList[0].floorRequestsList, 21)
+	// battery2.columnsList[2].elevatorsList[1].floorRequestsList = append(battery2.columnsList[2].elevatorsList[1].floorRequestsList, 28)
+	// battery2.columnsList[2].elevatorsList[2].floorRequestsList = append(battery2.columnsList[2].elevatorsList[2].floorRequestsList, 1)
+	// battery2.columnsList[2].elevatorsList[3].floorRequestsList = append(battery2.columnsList[2].elevatorsList[3].floorRequestsList, 24)
+	// battery2.columnsList[2].elevatorsList[4].floorRequestsList = append(battery2.columnsList[2].elevatorsList[4].floorRequestsList, 39)
+	// battery2.columnsList[2].elevatorsList[0].status = "stopped"
+	// battery2.columnsList[2].elevatorsList[1].status = "moving"
+	// battery2.columnsList[2].elevatorsList[2].status = "moving"
+	// battery2.columnsList[2].elevatorsList[3].status = "moving"
+	// battery2.columnsList[2].elevatorsList[4].status = "moving"
+	// battery2.columnsList[2].elevatorsList[0].direction = ""
+	// battery2.columnsList[2].elevatorsList[1].direction = "up"
+	// battery2.columnsList[2].elevatorsList[2].direction = "down"
+	// battery2.columnsList[2].elevatorsList[3].direction = "down"
+	// battery2.columnsList[2].elevatorsList[4].direction = "down"
+	// battery2.assignElevator(36, "up")
+
+	//Test Scenario 3
+	battery3 := new(Battery)
+	battery3.Init(2, 4, 60, 6, 5)
+	battery3.columnsList[3].elevatorsList[0].currentFloor = 58
+	battery3.columnsList[3].elevatorsList[1].currentFloor = 50
+	battery3.columnsList[3].elevatorsList[2].currentFloor = 46
+	battery3.columnsList[3].elevatorsList[3].currentFloor = 1
+	battery3.columnsList[3].elevatorsList[4].currentFloor = 60
+	battery3.columnsList[3].elevatorsList[0].floorRequestsList = append(battery3.columnsList[3].elevatorsList[0].floorRequestsList, 1)
+	battery3.columnsList[3].elevatorsList[1].floorRequestsList = append(battery3.columnsList[3].elevatorsList[1].floorRequestsList, 60)
+	battery3.columnsList[3].elevatorsList[2].floorRequestsList = append(battery3.columnsList[3].elevatorsList[2].floorRequestsList, 58)
+	battery3.columnsList[3].elevatorsList[3].floorRequestsList = append(battery3.columnsList[3].elevatorsList[3].floorRequestsList, 54)
+	battery3.columnsList[3].elevatorsList[4].floorRequestsList = append(battery3.columnsList[3].elevatorsList[4].floorRequestsList, 1)
+	battery3.columnsList[3].elevatorsList[0].status = "moving"
+	battery3.columnsList[3].elevatorsList[1].status = "moving"
+	battery3.columnsList[3].elevatorsList[2].status = "moving"
+	battery3.columnsList[3].elevatorsList[3].status = "moving"
+	battery3.columnsList[3].elevatorsList[4].status = "moving"
+	battery3.columnsList[3].elevatorsList[0].direction = "down"
+	battery3.columnsList[3].elevatorsList[1].direction = "up"
+	battery3.columnsList[3].elevatorsList[2].direction = "up"
+	battery3.columnsList[3].elevatorsList[3].direction = "up"
+	battery3.columnsList[3].elevatorsList[4].direction = "down"
+	battery3.columnsList[3].requestElevator(54, "down")
+
+	//fmt.Print(battery1.bestColumn)
+	//fmt.Print(battery1.bestElevator)
+	//fmt.Print(battery1.bestScore)
+	//fmt.Print(battery1.referenceGap)
 	//battery1.assignElevator(3, "up")
 	fmt.Print("\nwhy does the import fmt get deleted if you save without having an fmt called. That's stupic.")
 }
