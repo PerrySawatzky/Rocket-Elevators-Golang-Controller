@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"math"
-	//"container/list"
 )
 
 type Battery struct {
@@ -21,6 +20,7 @@ type Battery struct {
 	floorRequestButtonsList   []FloorRequestButton
 }
 
+//Used for the bool isBasement so the first Column is yes and the rest no
 func trueFalseinator(i int) bool {
 	if i == 0 {
 		return true
@@ -80,6 +80,8 @@ func (e *Battery) Init(_id int, _amountOfColumns int, _amountOfFloors int, _amou
 	}
 
 }
+
+//Very specific to the Scenarios
 func (this Battery) findBestColumn(_requestedFloor float64) Column {
 	bestColumn := this.columnsList[0]
 	if _requestedFloor < 1 {
@@ -105,6 +107,7 @@ func (this Battery) assignElevator(_requestedFloor float64, _direction string) E
 	bestElevator := this.columnsList[0].elevatorsList[1]
 	bestScore := 5
 	referenceGap := 10000
+	//Did it this way because go doesn't have a .Contains operator. Ended up making a func later, but this worked so I kept it.
 	if _requestedFloor < 1 {
 		bestColumn = this.columnsList[0]
 	}
@@ -118,6 +121,7 @@ func (this Battery) assignElevator(_requestedFloor float64, _direction string) E
 		bestColumn = this.columnsList[3]
 	}
 	if _requestedFloor > 1 {
+		//Dont ask about what the referenceGap is doing, it works and thats all you need to know.
 		for i := 0; i < len(bestColumn.elevatorsList); i++ {
 			if bestColumn.elevatorsList[i].currentFloor == 1 && bestColumn.elevatorsList[i].status == "stopped" {
 				bestElevator = bestColumn.elevatorsList[i]
@@ -141,7 +145,9 @@ func (this Battery) assignElevator(_requestedFloor float64, _direction string) E
 			}
 		}
 	}
+	//Adds floor to floorRequestList
 	bestElevator.floorRequestsList = append(bestElevator.floorRequestsList, _requestedFloor)
+	//Moves elevator to requestedFloor
 	for bestElevator.currentFloor > 1 {
 		bestElevator.currentFloor--
 		fmt.Print("Elevator is on floor ")
@@ -163,12 +169,14 @@ func (this Battery) assignElevator(_requestedFloor float64, _direction string) E
 		fmt.Print(".\n")
 	}
 	for bestElevator.currentFloor == _requestedFloor {
+		bestElevator.completedRequestsList = append(bestElevator.completedRequestsList, _requestedFloor)
 		bestElevator.status = "idle"
 		fmt.Print("*DING* Elevator has arrived at floor ")
 		fmt.Print(_requestedFloor)
 		fmt.Print(".\n")
 		break
 	}
+	//Scenario testing purposes
 	fmt.Print("ReferenceGap = ")
 	fmt.Print(referenceGap)
 	fmt.Print("\n")
@@ -184,6 +192,8 @@ func (this Battery) assignElevator(_requestedFloor float64, _direction string) E
 	return bestElevator
 
 }
+
+//Because go does not have a .Contains method I needed to make one. e is the variable you want to check the slice for.
 func contains(floorRequestsList []float64, e float64) bool {
 	for _, a := range floorRequestsList {
 		if a == e {
@@ -206,11 +216,13 @@ type Column struct {
 	callButtonsList   []CallButton
 }
 
+//The requestedFloor parameter is the floor the user is currently on, since they only have the option to head to the lobby.
 func (this Column) requestElevator(_requestedFloor float64, _direction string) Elevator {
 	bestElevator1 := this.elevatorsList[0]
 	bestScore1 := 5
 	referenceGap1 := 1000000
 	for i := 0; i < len(this.elevatorsList); i++ {
+		//For basement floors
 		if _requestedFloor > -7 && _requestedFloor < 1 {
 			if this.elevatorsList[i].currentFloor == _requestedFloor && this.elevatorsList[i].direction == "up" {
 				bestElevator1 = this.elevatorsList[i]
@@ -228,6 +240,7 @@ func (this Column) requestElevator(_requestedFloor float64, _direction string) E
 				referenceGap1 = int(math.Abs(float64(this.elevatorsList[i].currentFloor - _requestedFloor)))
 			}
 		}
+		//Same thing but for floors above the lobby, just changed up for down essentially
 		if _requestedFloor > 1 && _requestedFloor < 61 {
 			if this.elevatorsList[i].currentFloor == _requestedFloor && this.elevatorsList[i].direction == "down" {
 				bestElevator1 = this.elevatorsList[i]
@@ -246,6 +259,7 @@ func (this Column) requestElevator(_requestedFloor float64, _direction string) E
 			}
 		}
 	}
+	//Moves elevator to lobby and prints a beautiful message each time.
 	for bestElevator1.currentFloor > 1 {
 		for bestElevator1.currentFloor == _requestedFloor {
 			fmt.Print("*DING* Elevator doors are open, please enter.\n")
@@ -275,6 +289,7 @@ func (this Column) requestElevator(_requestedFloor float64, _direction string) E
 		fmt.Print("*DING* Elevator has arrived at Lobby.\n")
 		break
 	}
+	//Scenario testing is done here so I don't need to write it in main
 	fmt.Print("ReferenceGap = ")
 	fmt.Print(referenceGap1)
 	fmt.Print("\n")
@@ -321,7 +336,7 @@ type Elevator struct {
 	direction             string
 	door                  []Door
 	floorRequestsList     []float64
-	completedRequestsList []int
+	completedRequestsList []float64
 }
 
 func (e *Elevator) Init(_id int, _status string, _currentFloor float64) {
@@ -371,9 +386,6 @@ func (e *Door) Init(_id int) {
 	e.ID = _id
 	e.status = "closed"
 }
-
-//Add door functionality, door.status = "open" etc
-//Then on to the fun methods and selectors tomorrow >:)
 func main() {
 	//Test Scenario 1
 	battery1 := new(Battery)
