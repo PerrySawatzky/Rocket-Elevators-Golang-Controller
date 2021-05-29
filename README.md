@@ -19,7 +19,7 @@ Project was created in two languages:
 To run this project, clone it through your Command Line Interface locally by entering:
 ```
 gh repo clone PerrySawatzky/Rocket-Elevators-Go-Controller
-
+```
 .NET Core 3.0 is required, [download here](https://golang.org/doc/install)
 
 ## Code Examples
