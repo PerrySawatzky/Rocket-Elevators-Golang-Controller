@@ -96,13 +96,13 @@ func (this Battery) findBestColumn(_requestedFloor float64) Column {
 	if _requestedFloor >= 41 {
 		bestColumn = this.columnsList[3]
 	}
-	fmt.Print("bestColumn is Array #")
+	fmt.Print("bestColumn is Array ")
 	fmt.Print(bestColumn.ID)
 	fmt.Print("\n")
 	return bestColumn
 }
 
-func (this Battery) assignElevator(_requestedFloor float64, _direction string) Elevator {
+func (this Battery) assignElevator(_requestedFloor float64, _direction string) (Column, Elevator) {
 	bestColumn := this.columnsList[0]
 	bestElevator := this.columnsList[0].elevatorsList[1]
 	bestScore := 5
@@ -183,13 +183,13 @@ func (this Battery) assignElevator(_requestedFloor float64, _direction string) E
 	fmt.Print("bestScore = ")
 	fmt.Print(bestScore)
 	fmt.Print("\n")
-	fmt.Print("bestColumn is Array #")
+	fmt.Print("bestColumn is Array ")
 	fmt.Print(bestColumn.ID)
 	fmt.Print("\n")
 	fmt.Print("bestElevator Array ID  = ")
 	fmt.Print(bestElevator.ID)
 	fmt.Print("\n")
-	return bestElevator
+	return bestColumn, bestElevator
 
 }
 
