@@ -66,6 +66,8 @@ func (e *Battery) Init(_id int, _amountOfColumns int, _amountOfFloors int, _amou
 			e.columnsList[3].servedFloors = append(e.columnsList[3].servedFloors, 1)
 		}
 	}
+	//Leave the basement floors alone and make the rest dynamic.
+	//modulo to give rest or remainder of the division.
 	//Lobby only up and down buttons
 	for i := 0; i < 1; i++ {
 		upFloorRequestButtonCreator := new(FloorRequestButton)
