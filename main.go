@@ -475,26 +475,26 @@ func main() {
 	// battery3.columnsList[3].requestElevator(54, "down")
 
 	//Test Scenario 4
-	battery4 := new(Battery)
-	battery4.Init(2, 4, 60, 6, 5)
-	battery4.columnsList[0].elevatorsList[0].currentFloor = -4
-	battery4.columnsList[0].elevatorsList[1].currentFloor = 1
-	battery4.columnsList[0].elevatorsList[2].currentFloor = -3
-	battery4.columnsList[0].elevatorsList[3].currentFloor = -6
-	battery4.columnsList[0].elevatorsList[4].currentFloor = -1
-	battery4.columnsList[0].elevatorsList[2].floorRequestsList = append(battery4.columnsList[0].elevatorsList[2].floorRequestsList, -5)
-	battery4.columnsList[0].elevatorsList[3].floorRequestsList = append(battery4.columnsList[0].elevatorsList[3].floorRequestsList, 1)
-	battery4.columnsList[0].elevatorsList[4].floorRequestsList = append(battery4.columnsList[0].elevatorsList[4].floorRequestsList, -6)
-	battery4.columnsList[0].elevatorsList[0].status = "idle"
-	battery4.columnsList[0].elevatorsList[1].status = "idle"
-	battery4.columnsList[0].elevatorsList[2].status = "moving"
-	battery4.columnsList[0].elevatorsList[3].status = "moving"
-	battery4.columnsList[0].elevatorsList[4].status = "moving"
-	battery4.columnsList[0].elevatorsList[0].direction = ""
-	battery4.columnsList[0].elevatorsList[1].direction = ""
-	battery4.columnsList[0].elevatorsList[2].direction = "down"
-	battery4.columnsList[0].elevatorsList[3].direction = "up"
-	battery4.columnsList[0].elevatorsList[4].direction = "down"
-	battery4.columnsList[0].requestElevator(-3, "up")
+	// battery4 := new(Battery)
+	// battery4.Init(2, 4, 60, 6, 5)
+	// battery4.columnsList[0].elevatorsList[0].currentFloor = -4
+	// battery4.columnsList[0].elevatorsList[1].currentFloor = 1
+	// battery4.columnsList[0].elevatorsList[2].currentFloor = -3
+	// battery4.columnsList[0].elevatorsList[3].currentFloor = -6
+	// battery4.columnsList[0].elevatorsList[4].currentFloor = -1
+	// battery4.columnsList[0].elevatorsList[2].floorRequestsList = append(battery4.columnsList[0].elevatorsList[2].floorRequestsList, -5)
+	// battery4.columnsList[0].elevatorsList[3].floorRequestsList = append(battery4.columnsList[0].elevatorsList[3].floorRequestsList, 1)
+	// battery4.columnsList[0].elevatorsList[4].floorRequestsList = append(battery4.columnsList[0].elevatorsList[4].floorRequestsList, -6)
+	// battery4.columnsList[0].elevatorsList[0].status = "idle"
+	// battery4.columnsList[0].elevatorsList[1].status = "idle"
+	// battery4.columnsList[0].elevatorsList[2].status = "moving"
+	// battery4.columnsList[0].elevatorsList[3].status = "moving"
+	// battery4.columnsList[0].elevatorsList[4].status = "moving"
+	// battery4.columnsList[0].elevatorsList[0].direction = ""
+	// battery4.columnsList[0].elevatorsList[1].direction = ""
+	// battery4.columnsList[0].elevatorsList[2].direction = "down"
+	// battery4.columnsList[0].elevatorsList[3].direction = "up"
+	// battery4.columnsList[0].elevatorsList[4].direction = "down"
+	// battery4.columnsList[0].requestElevator(-3, "up")
 
 }
