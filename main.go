@@ -269,7 +269,7 @@ func (this Column) requestElevator(_requestedFloor float64, _direction string) E
 	for bestElevator1.currentFloor > 1 {
 		for bestElevator1.currentFloor == _requestedFloor {
 			bestElevator1.door.status = "open"
-			fmt.Print("*DING* Elevator doors are open, please enter.\n")
+			fmt.Print("*DINGS* Elevator doors are open, please enter.\n")
 			break
 		}
 		bestElevator1.currentFloor--
