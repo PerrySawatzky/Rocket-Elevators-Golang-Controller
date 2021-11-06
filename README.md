@@ -21,7 +21,7 @@ To run this project, clone it through your Command Line Interface locally by ent
 ```
 gh repo clone PerrySawatzky/Rocket-Elevators-Go-Controller
 ```
-.NET Core 3.0 is required, [download here](https://golang.org/doc/install)
+.NET Core 3.0 is required, [download here](https://dotnet.microsoft.com/download/dotnet/3.0)
 
 ## Code Examples
 This repo includes 4 test scenarios at the bottom of the file, starting at line 400.
